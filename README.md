@@ -1,6 +1,6 @@
 # Compact MNIST Classifier
 
-[![Model Tests](https://github.com/{username}/{repository}/actions/workflows/model_tests.yml/badge.svg)](https://github.com/{username}/{repository}/actions/workflows/model_tests.yml)
+[![Model Tests](https://github.com/your-username/your-repository/actions/workflows/model_tests.yml/badge.svg)](https://github.com/your-username/your-repository/actions/workflows/model_tests.yml)
 
 This repository contains a PyTorch implementation of a compact MNIST classifier that achieves >95% accuracy in a single epoch while using less than 25,000 parameters.
 
@@ -57,7 +57,7 @@ pytest tests/
 
 - Uses residual connections for better gradient flow
 - Employs batch normalization for faster convergence
-- Carefully balanced channel progression (1→12→16→24)
+- Carefully balanced channel progression (1→12���16→24)
 - Efficient parameter usage through modern architectural choices
 - Dropout and data augmentation for regularization
 
