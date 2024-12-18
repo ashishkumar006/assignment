@@ -5,6 +5,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from model import CompactMNIST
 import math
+from tqdm import tqdm
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -70,7 +71,11 @@ def train_one_epoch():
     total = 0
     running_loss = 0.0
 
-    for batch_idx, (data, target) in enumerate(train_loader):
+    torch.manual_seed(42)  # For reproducibility
+    
+    # Add progress bar
+    pbar = tqdm(train_loader, desc='Training')
+    for batch_idx, (data, target) in enumerate(pbar):
         data, target = data.to(device), target.to(device)
         
         # Forward pass
@@ -94,11 +99,11 @@ def train_one_epoch():
         correct += predicted.eq(target).sum().item()
         running_loss += loss.item()
         
-        # Print progress
-        if (batch_idx + 1) % 100 == 0:
-            print(f'Batch [{batch_idx + 1}/{len(train_loader)}] | '
-                  f'Loss: {running_loss / (batch_idx + 1):.3f} | '
-                  f'Acc: {100.*correct/total:.2f}%')
+        # Update progress bar
+        pbar.set_postfix({
+            'loss': f'{running_loss/(batch_idx+1):.3f}',
+            'acc': f'{100.*correct/total:.2f}%'
+        })
 
     accuracy = 100. * correct / total
     print(f'Final Training Accuracy: {accuracy:.2f}%')
