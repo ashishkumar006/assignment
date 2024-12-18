@@ -26,7 +26,15 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install --no-cache-dir -r requirements.txt
-        python -c "import torch; import torchvision; import tqdm; print('Dependencies successfully imported')"
+        python -c "
+        import torch
+        import torchvision
+        import tqdm
+        print('PyTorch version:', torch.__version__)
+        print('Torchvision version:', torchvision.__version__)
+        print('Device available:', torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+        print('Dependencies successfully imported')
+        "
         
     - name: Check parameter count
       run: |
@@ -58,7 +66,8 @@ jobs:
         from train import train_one_epoch
         
         print('Starting training...')
-        print(f'Using device: {torch.device('cuda' if torch.cuda.is_available() else 'cpu')}')
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f'Using device: {device}')
         
         try:
             accuracy = train_one_epoch()
