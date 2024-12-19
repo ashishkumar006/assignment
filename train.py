@@ -15,11 +15,8 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 def train_one_epoch():
-    # Check if running in GitHub Actions
-    is_github = os.getenv('GITHUB_ACTIONS') == 'true'
-    
     # Set environment variable for Intel MKL optimization
-    os.environ['MKL_NUM_THREADS'] = '2' if is_github else '4'
+    os.environ['MKL_NUM_THREADS'] = '4'
     
     # Set all random seeds for reproducibility
     torch.manual_seed(42)
@@ -28,7 +25,7 @@ def train_one_epoch():
     np.random.seed(42)
     random.seed(42)
 
-    # Simpler transforms for GitHub environment
+    # Simple transforms that work well
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,)),
@@ -42,13 +39,10 @@ def train_one_epoch():
         ], p=0.5)
     ])
 
-    # Adjusted batch size
-    batch_size = 64 if is_github else 128  # Smaller batch size for GitHub
-
     train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
     train_loader = DataLoader(
         train_dataset,
-        batch_size=batch_size,
+        batch_size=128,
         shuffle=True,
         num_workers=0,
         pin_memory=True
@@ -61,44 +55,19 @@ def train_one_epoch():
     model.train()
 
     criterion = nn.CrossEntropyLoss()
+    optimizer = optim.AdamW(
+        model.parameters(),
+        lr=0.003,
+        betas=(0.9, 0.999),
+        eps=1e-8,
+        weight_decay=0.01
+    )
     
-    # Optimized parameters for GitHub
-    if is_github:
-        optimizer = optim.AdamW(
-            model.parameters(),
-            lr=0.0037,
-            betas=(0.9, 0.999),
-            eps=1e-8,
-            weight_decay=0.01
-        )
-        
-        # Custom learning rate schedule for GitHub
-        def lr_schedule(step, total_steps):
-            warmup_steps = total_steps // 6
-            if step < warmup_steps:
-                return float(step) / float(max(1, warmup_steps))
-            else:
-                return 0.5 * (1.0 + math.cos(math.pi * (step - warmup_steps) / (total_steps - warmup_steps)))
-        
-        total_steps = len(train_loader)
-        scheduler = torch.optim.lr_scheduler.LambdaLR(
-            optimizer,
-            lr_lambda=lambda step: lr_schedule(step, total_steps)
-        )
-    else:
-        # Original settings for local training
-        optimizer = optim.AdamW(
-            model.parameters(),
-            lr=0.0037,
-            betas=(0.9, 0.999),
-            eps=1e-8,
-            weight_decay=0.01
-        )
-        scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer,
-            step_size=len(train_loader) // 3,
-            gamma=0.35
-        )
+    scheduler = torch.optim.lr_scheduler.StepLR(
+        optimizer,
+        step_size=len(train_loader) // 3,
+        gamma=0.3
+    )
 
     correct = 0
     total = 0

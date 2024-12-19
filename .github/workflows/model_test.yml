@@ -29,11 +29,11 @@ jobs:
         
     - name: Configure CPU settings
       run: |
-        echo "MKL_NUM_THREADS=2" >> $GITHUB_ENV
-        echo "OMP_NUM_THREADS=2" >> $GITHUB_ENV
-        echo "OPENBLAS_NUM_THREADS=2" >> $GITHUB_ENV
-        echo "OMP_WAIT_POLICY=PASSIVE" >> $GITHUB_ENV
-        echo "OMP_PROC_BIND=FALSE" >> $GITHUB_ENV
+        echo "MKL_NUM_THREADS=4" >> $GITHUB_ENV
+        echo "OMP_NUM_THREADS=4" >> $GITHUB_ENV
+        echo "OPENBLAS_NUM_THREADS=4" >> $GITHUB_ENV
+        echo "OMP_WAIT_POLICY=ACTIVE" >> $GITHUB_ENV
+        echo "OMP_DYNAMIC=FALSE" >> $GITHUB_ENV
         
     - name: Check parameter count
       run: |
@@ -68,7 +68,8 @@ jobs:
         torch.use_deterministic_algorithms(True)
         
         # Set thread count
-        torch.set_num_threads(2)
+        torch.set_num_threads(4)
+        os.environ['MKL_NUM_THREADS'] = '4'
         
         from train import train_one_epoch
         try:
