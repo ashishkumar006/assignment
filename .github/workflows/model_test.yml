@@ -37,59 +37,59 @@ jobs:
         
     - name: Check parameter count
       run: |
-        python -c "
-import torch
-from model import CompactMNIST
-from train import count_parameters
+        python -c '
+        import torch
+        from model import CompactMNIST
+        from train import count_parameters
 
-model = CompactMNIST()
-param_count = count_parameters(model)
+        model = CompactMNIST()
+        param_count = count_parameters(model)
 
-print(f'\nModel Architecture:')
-print(model)
-print(f'\nParameter count by layer:')
-for name, param in model.named_parameters():
-    if param.requires_grad:
-        print(f'{name}: {param.numel():,} parameters')
+        print(f"\nModel Architecture:")
+        print(model)
+        print(f"\nParameter count by layer:")
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                print(f"{name}: {param.numel():,} parameters")
 
-print(f'\nTotal trainable parameters: {param_count:,}')
-assert param_count < 25000, f'Model has {param_count:,} parameters, exceeding limit of 25,000'
-print(f'✓ Parameter count check passed: {param_count:,} parameters')
-"
+        print(f"\nTotal trainable parameters: {param_count:,}")
+        assert param_count < 25000, f"Model has {param_count:,} parameters, exceeding limit of 25,000"
+        print(f"✓ Parameter count check passed: {param_count:,} parameters")
+        '
         
     - name: Run training with 3 attempts
       run: |
         for i in {1..3}; do
           echo "Training attempt $i of 3"
-          python -c "
-import torch
-import os
-import random
-import numpy as np
+          python -c '
+        import torch
+        import os
+        import random
+        import numpy as np
 
-# Set seeds for reproducibility
-torch.manual_seed(42 * $i)
-np.random.seed(42 * $i)
-random.seed(42 * $i)
-torch.backends.cudnn.deterministic = True
-torch.use_deterministic_algorithms(True)
+        # Set seeds for reproducibility
+        torch.manual_seed(42)
+        np.random.seed(42)
+        random.seed(42)
+        torch.backends.cudnn.deterministic = True
+        torch.use_deterministic_algorithms(True)
 
-# Configure for high-performance CPU
-torch.set_num_threads(4)
-torch.set_num_interop_threads(4)
+        # Configure for high-performance CPU
+        torch.set_num_threads(4)
+        torch.set_num_interop_threads(4)
 
-from train import train_one_epoch
-try:
-    accuracy = train_one_epoch()
-    print(f'\nAccuracy achieved: {accuracy:.2f}%')
-    if accuracy > 95:
-        print(f'✓ Accuracy check passed: {accuracy:.2f}%')
-        exit(0)
-    else:
-        print(f'Accuracy {accuracy:.2f}% below target, trying again...')
-except Exception as e:
-    print(f'Error during training: {str(e)}')
-"
+        from train import train_one_epoch
+        try:
+            accuracy = train_one_epoch()
+            print(f"\nAccuracy achieved: {accuracy:.2f}%")
+            if accuracy > 95:
+                print(f"✓ Accuracy check passed: {accuracy:.2f}%")
+                exit(0)
+            else:
+                print(f"Accuracy {accuracy:.2f}% below target, trying again...")
+        except Exception as e:
+            print(f"Error during training: {str(e)}")
+        '
           if [ $? -eq 0 ]; then
             exit 0
           fi
