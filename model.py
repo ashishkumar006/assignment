@@ -38,7 +38,7 @@ class CompactMNIST(nn.Module):
         identity = self.conv2a(x)
         x = F.relu(self.bn2a(identity))
         x = self.bn2b(self.conv2b(x))
-        x = F.relu(x + identity)
+        x = F.relu(x + identity)  # Residual connection
         
         # Third block
         x = F.relu(self.bn3(self.conv3(x)))
