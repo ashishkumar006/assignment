@@ -67,9 +67,9 @@ def train_one_epoch():
         optimizer = optim.AdamW(
             model.parameters(),
             lr=0.004,
-            betas=(0.95, 0.999),
+            betas=(0.9, 0.999),
             eps=1e-8,
-            weight_decay=0.008
+            weight_decay=0.01
         )
         
         # Custom learning rate schedule for GitHub
@@ -89,7 +89,7 @@ def train_one_epoch():
         # Original settings for local training
         optimizer = optim.AdamW(
             model.parameters(),
-            lr=0.003,
+            lr=0.004,
             betas=(0.9, 0.999),
             eps=1e-8,
             weight_decay=0.01
@@ -97,7 +97,7 @@ def train_one_epoch():
         scheduler = torch.optim.lr_scheduler.StepLR(
             optimizer,
             step_size=len(train_loader) // 3,
-            gamma=0.3
+            gamma=0.35
         )
 
     correct = 0
