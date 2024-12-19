@@ -4,6 +4,11 @@
 
 This repository contains a PyTorch implementation of a compact MNIST classifier that achieves >95% accuracy in a single epoch while using less than 25,000 parameters.
 
+## Tested Environments
+- Python: 3.7, 3.8, 3.9
+- PyTorch: 1.9.0, 1.10.0, 1.11.0
+- Best performance achieved with Python 3.8 and PyTorch 1.9.0
+
 ## Testing Strategy
 - Automated testing on GitHub Actions
 - Multiple training attempts to ensure reliability
