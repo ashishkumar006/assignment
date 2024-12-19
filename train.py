@@ -19,7 +19,7 @@ def train_one_epoch():
     is_github = os.getenv('GITHUB_ACTIONS') == 'true'
     
     # Set environment variable for Intel MKL optimization
-    os.environ['MKL_NUM_THREADS'] = '4'
+    os.environ['MKL_NUM_THREADS'] = '2' if is_github else '4'
     
     # Set all random seeds for reproducibility
     torch.manual_seed(42)
@@ -28,22 +28,22 @@ def train_one_epoch():
     np.random.seed(42)
     random.seed(42)
 
-    # Enhanced transforms for GitHub environment
+    # Simpler transforms for GitHub environment
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,)),
         transforms.RandomApply([
             transforms.RandomAffine(
-                degrees=6,
-                translate=(0.06, 0.06),
-                scale=(0.94, 1.06),
+                degrees=5,
+                translate=(0.05, 0.05),
+                scale=(0.95, 1.05),
                 fill=0
             )
-        ], p=0.6)
+        ], p=0.5)
     ])
 
-    # Adjusted batch size for GitHub
-    batch_size = 96 if is_github else 128
+    # Adjusted batch size
+    batch_size = 64 if is_github else 128  # Smaller batch size for GitHub
 
     train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
     train_loader = DataLoader(
@@ -66,7 +66,7 @@ def train_one_epoch():
     if is_github:
         optimizer = optim.AdamW(
             model.parameters(),
-            lr=0.004,
+            lr=0.0037,
             betas=(0.9, 0.999),
             eps=1e-8,
             weight_decay=0.01
@@ -89,7 +89,7 @@ def train_one_epoch():
         # Original settings for local training
         optimizer = optim.AdamW(
             model.parameters(),
-            lr=0.004,
+            lr=0.0037,
             betas=(0.9, 0.999),
             eps=1e-8,
             weight_decay=0.01

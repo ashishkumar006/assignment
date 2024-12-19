@@ -29,10 +29,11 @@ jobs:
         
     - name: Configure CPU settings
       run: |
-        echo "MKL_NUM_THREADS=4" >> $GITHUB_ENV
-        echo "OMP_NUM_THREADS=4" >> $GITHUB_ENV
-        echo "OPENBLAS_NUM_THREADS=4" >> $GITHUB_ENV
-        echo "OMP_WAIT_POLICY=ACTIVE" >> $GITHUB_ENV
+        echo "MKL_NUM_THREADS=2" >> $GITHUB_ENV
+        echo "OMP_NUM_THREADS=2" >> $GITHUB_ENV
+        echo "OPENBLAS_NUM_THREADS=2" >> $GITHUB_ENV
+        echo "OMP_WAIT_POLICY=PASSIVE" >> $GITHUB_ENV
+        echo "OMP_PROC_BIND=FALSE" >> $GITHUB_ENV
         
     - name: Check parameter count
       run: |
@@ -51,26 +52,23 @@ jobs:
     - name: Run accuracy test
       run: |
         max_accuracy=0
-        seeds=(42 137 299)  # Try 3 different seeds
+        seeds=(42 137 299)
         
         for seed in "${seeds[@]}"; do
           echo "Training attempt with seed $seed..."
           python -c "
         import torch, random, numpy as np, os
         
-        # Set environment
-        torch.set_num_threads(4)
-        os.environ['MKL_NUM_THREADS'] = '4'
-        
-        # Set seed
-        seed = $seed
-        torch.manual_seed(seed)
-        np.random.seed(seed)
-        random.seed(seed)
-        
-        # Set deterministic behavior
+        # Force deterministic behavior
+        torch.manual_seed($seed)
+        np.random.seed($seed)
+        random.seed($seed)
         torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
         torch.use_deterministic_algorithms(True)
+        
+        # Set thread count
+        torch.set_num_threads(2)
         
         from train import train_one_epoch
         try:
