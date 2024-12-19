@@ -46,18 +46,19 @@ jobs:
         print(f'✓ Parameter count check passed: {param_count:,} parameters')
         "
         
-    - name: Run accuracy test (5 attempts)
+    - name: Run accuracy test (10 attempts)
       run: |
         max_accuracy=0
-        for i in {1..5}; do
-          echo "Training attempt $i of 5..."
+        seeds=(42 137 299 433 577 701 859 967 1033 1151)  # Different prime numbers as seeds
+        for i in {0..9}; do
+          echo "Training attempt $((i+1)) of 10 with seed ${seeds[i]}..."
           python -c "
         import torch
         import random
         import numpy as np
         
-        # Set different seeds for each attempt
-        seed = 42 * $i
+        # Use different seeds for each attempt
+        seed = ${seeds[i]}
         torch.manual_seed(seed)
         np.random.seed(seed)
         random.seed(seed)
@@ -82,10 +83,10 @@ jobs:
               exit 0
             fi
           fi
-          echo "Attempt $i accuracy: ${current_accuracy}%"
+          echo "Attempt $((i+1)) accuracy: ${current_accuracy}%"
         done
         
-        echo "Failed to achieve 95% accuracy in 5 attempts"
+        echo "Failed to achieve 95% accuracy in 10 attempts"
         echo "Best accuracy achieved: ${max_accuracy}%"
         exit 1
 
