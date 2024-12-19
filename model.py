@@ -22,15 +22,23 @@ class CompactMNIST(nn.Module):
         self.dropout = nn.Dropout2d(0.2)
         self.fc = nn.Linear(24 * 7 * 7, 10)
 
+        # Initialize weights
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
     def forward(self, x):
         # First block
         x = F.relu(self.bn1(self.conv1(x)))
         
         # Second block with residual
-        identity = self.conv2a(x)  # Projection shortcut
+        identity = self.conv2a(x)
         x = F.relu(self.bn2a(identity))
         x = self.bn2b(self.conv2b(x))
-        x = F.relu(x + identity)  # Residual connection
+        x = F.relu(x + identity)
         
         # Third block
         x = F.relu(self.bn3(self.conv3(x)))
@@ -38,4 +46,4 @@ class CompactMNIST(nn.Module):
         
         x = x.view(-1, 24 * 7 * 7)
         x = self.fc(x)
-        return x 
+        return x

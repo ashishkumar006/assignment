@@ -1,17 +1,31 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.optim.lr_scheduler import OneCycleLR
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from model import CompactMNIST
 import math
 from tqdm import tqdm
+import numpy as np
+import random
+import os
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 def train_one_epoch():
-    # Custom transforms for MNIST
+    # Set environment variable for Intel MKL optimization
+    os.environ['MKL_NUM_THREADS'] = '4'  # For Intel CPU optimization
+    
+    # Set all random seeds for reproducibility
+    torch.manual_seed(42)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(42)
+    random.seed(42)
+
+    # Optimized transforms for Intel GPU
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,)),
@@ -28,14 +42,20 @@ def train_one_epoch():
     train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
     train_loader = DataLoader(
         train_dataset,
-        batch_size=128,
+        batch_size=96,
         shuffle=True,
-        num_workers=4,
+        num_workers=0,
         pin_memory=True
     )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Simplified device selection
+    device = torch.device("cpu")
+    torch.set_num_threads(4)  # Use all threads on i3
+    
+    print(f"Using device: {device}")
+    
     model = CompactMNIST().to(device)
+    model.train()
     
     param_count = count_parameters(model)
     print(f"Model has {param_count} parameters")
@@ -45,34 +65,23 @@ def train_one_epoch():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(
         model.parameters(),
-        lr=0.003,
+        lr=0.002,  # Slightly lower learning rate
         betas=(0.9, 0.999),
         eps=1e-8,
         weight_decay=0.01
     )
     
-    # Custom learning rate schedule
-    def get_lr(step, total_steps, lr_max, lr_min):
-        return lr_min + (lr_max - lr_min) * 0.5 * (1 + math.cos(step / total_steps * math.pi))
-
-    total_steps = len(train_loader)
-    scheduler = torch.optim.lr_scheduler.LambdaLR(
+    # Adjusted scheduler
+    scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer,
-        lr_lambda=lambda step: get_lr(
-            step,
-            total_steps,
-            lr_max=1,  # Will give initial lr of 0.003
-            lr_min=0.1  # Will give final lr of 0.0003
-        )
+        step_size=len(train_loader) // 4,  # More frequent steps
+        gamma=0.2  # Less aggressive decay
     )
 
-    model.train()
     correct = 0
     total = 0
     running_loss = 0.0
 
-    torch.manual_seed(42)  # For reproducibility
-    
     # Add progress bar
     pbar = tqdm(train_loader, desc='Training')
     for batch_idx, (data, target) in enumerate(pbar):
