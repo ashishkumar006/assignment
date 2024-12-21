@@ -1,113 +1,28 @@
 name: Model Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   test:
-    strategy:
-      matrix:
-        python-version: ['3.7', '3.8', '3.9']
-        pytorch-version: ['1.9.0', '1.10.0', '1.11.0']
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
-        
-    - name: Cache pip
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ matrix.pytorch-version }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+        python-version: '3.8'
         
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install torch==${{ matrix.pytorch-version }}+cpu torchvision==0.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-        pip install numpy==1.21.0 tqdm pillow>=9.0.0
-        python -c "import torch; print('PyTorch:', torch.__version__)"
-        python -c "import sys; print('Python:', sys.version)"
+        pip install -r requirements.txt
         
-    - name: Configure CPU settings
+    - name: Run tests
       run: |
-        echo "MKL_NUM_THREADS=4" >> $GITHUB_ENV
-        echo "OMP_NUM_THREADS=4" >> $GITHUB_ENV
-        echo "OPENBLAS_NUM_THREADS=4" >> $GITHUB_ENV
-        echo "OMP_WAIT_POLICY=ACTIVE" >> $GITHUB_ENV
-        echo "OMP_DYNAMIC=FALSE" >> $GITHUB_ENV
-        
-    - name: Check parameter count
-      run: |
-        python -c "
-        import torch
-        from model import CompactMNIST
-        from train import count_parameters
-        
-        model = CompactMNIST()
-        param_count = count_parameters(model)
-        print(f'\nTotal trainable parameters: {param_count:,}')
-        assert param_count < 25000, f'Model has {param_count:,} parameters, exceeding limit of 25,000'
-        print(f'✓ Parameter count check passed: {param_count:,} parameters')
-        "
-        
-    - name: Run accuracy test
-      run: |
-        max_accuracy=0
-        seeds=(42 137 299)
-        
-        for seed in "${seeds[@]}"; do
-          echo "Training attempt with seed $seed..."
-          python -c "
-        import torch, random, numpy as np, os
-        
-        # Force deterministic behavior
-        torch.manual_seed($seed)
-        np.random.seed($seed)
-        random.seed($seed)
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-        torch.use_deterministic_algorithms(True)
-        
-        # Set thread count
-        torch.set_num_threads(4)
-        os.environ['MKL_NUM_THREADS'] = '4'
-        
-        from train import train_one_epoch
-        try:
-            accuracy = train_one_epoch()
-            print(f'Accuracy: {accuracy:.2f}%')
-            with open('accuracy.txt', 'w') as f:
-                f.write(str(accuracy))
-        except Exception as e:
-            print(f'Error: {str(e)}')
-            exit(1)
-        "
-          if [ -f accuracy.txt ]; then
-            current_accuracy=$(cat accuracy.txt)
-            if (( $(echo "$current_accuracy > $max_accuracy" | bc -l) )); then
-              max_accuracy=$current_accuracy
-            fi
-            if (( $(echo "$current_accuracy >= 95.0" | bc -l) )); then
-              echo "✓ Accuracy check passed: ${current_accuracy}%"
-              exit 0
-            fi
-          fi
-          echo "Current accuracy: ${current_accuracy}%"
-        done
-        
-        echo "Failed to achieve 95% accuracy"
-        echo "Best accuracy achieved: ${max_accuracy}%"
-        exit 1
-
-    - name: Report Results
-      if: always()
-      run: |
-        echo "### Model Test Results" >> $GITHUB_STEP_SUMMARY
-        echo "- Parameter Count: $(cat param_count.txt 2>/dev/null || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
-        echo "- Best Accuracy: $(cat accuracy.txt 2>/dev/null || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
+        pytest tests/

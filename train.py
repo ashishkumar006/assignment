@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim.lr_scheduler import OneCycleLR
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from model import CompactMNIST
-import math
 from tqdm import tqdm
 import numpy as np
 import random
@@ -15,17 +13,14 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 def train_one_epoch():
-    # Set environment variable for Intel MKL optimization
     os.environ['MKL_NUM_THREADS'] = '4'
     
-    # Set all random seeds for reproducibility
     torch.manual_seed(42)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     np.random.seed(42)
     random.seed(42)
 
-    # Simple transforms that work well
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,)),
@@ -57,7 +52,7 @@ def train_one_epoch():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(
         model.parameters(),
-        lr=0.003,
+        lr=0.005,
         betas=(0.9, 0.999),
         eps=1e-8,
         weight_decay=0.01
@@ -66,7 +61,7 @@ def train_one_epoch():
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer,
         step_size=len(train_loader) // 3,
-        gamma=0.3
+        gamma=0.5
     )
 
     correct = 0
@@ -82,7 +77,6 @@ def train_one_epoch():
         loss = criterion(output, target)
         loss.backward()
         
-        # Gradient clipping
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         
         optimizer.step()
