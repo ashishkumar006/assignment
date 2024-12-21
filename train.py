@@ -23,15 +23,7 @@ def train_one_epoch():
 
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),
-        transforms.RandomApply([
-            transforms.RandomAffine(
-                degrees=5,
-                translate=(0.05, 0.05),
-                scale=(0.95, 1.05),
-                fill=0
-            )
-        ], p=0.5)
+        transforms.Normalize((0.1307,), (0.3081,))
     ])
 
     train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
