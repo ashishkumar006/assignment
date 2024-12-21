@@ -14,8 +14,8 @@ def check_model():
     accuracy = evaluate_model(model)  # Implement this function to return accuracy
     
     # Check accuracy
-    if accuracy <= 95:
-        raise ValueError(f"Accuracy is {accuracy:.2f}%, which is less than 95%.")
+    if accuracy <= 95:  # Ensure accuracy is greater than 95%
+        raise ValueError(f"Accuracy is {accuracy:.2f}%, which is less than or equal to 95%.")
 
     print("Model checks passed: Parameters < 25,000 and Accuracy > 95%.")
 
