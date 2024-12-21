@@ -4,13 +4,14 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from model import CompactMNIST
-from tqdm import tqdm
 import numpy as np
 import random
 import os
 
-# Define transform globally
+# Define transform with image augmentation
 transform = transforms.Compose([
+    transforms.RandomRotation(10),  # Randomly rotate images by ±10 degrees
+    transforms.RandomHorizontalFlip(),  # Randomly flip images horizontally
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))
 ])
@@ -61,8 +62,7 @@ def train_one_epoch():
     total = 0
     running_loss = 0.0
 
-    pbar = tqdm(train_loader, desc='Training')
-    for batch_idx, (data, target) in enumerate(pbar):
+    for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         
         optimizer.zero_grad(set_to_none=True)
@@ -80,10 +80,11 @@ def train_one_epoch():
         correct += predicted.eq(target).sum().item()
         running_loss += loss.item()
         
-        pbar.set_postfix({
-            'loss': f'{running_loss/(batch_idx+1):.3f}',
-            'acc': f'{100.*correct/total:.2f}%'
-        })
+        # Print loss and accuracy every 10 batches
+        if (batch_idx + 1) % 10 == 0:
+            avg_loss = running_loss / (batch_idx + 1)
+            avg_accuracy = 100. * correct / total
+            print(f'Batch {batch_idx + 1}/{len(train_loader)}, Loss: {avg_loss:.3f}, Accuracy: {avg_accuracy:.2f}%')
 
     accuracy = 100. * correct / total
     print(f'Final Training Accuracy: {accuracy:.2f}%')
