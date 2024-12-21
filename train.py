@@ -92,6 +92,32 @@ def train_one_epoch():
     
     return accuracy
 
+def evaluate_model(model):
+    model.eval()  # Set the model to evaluation mode
+    correct = 0
+    total = 0
+
+    # Assuming you have a test dataset and DataLoader
+    test_dataset = datasets.MNIST('./data', train=False, download=True, transform=transform)
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=128,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=True
+    )
+
+    with torch.no_grad():  # Disable gradient calculation
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            _, predicted = output.max(1)
+            total += target.size(0)
+            correct += predicted.eq(target).sum().item()
+
+    accuracy = 100. * correct / total
+    return accuracy
+
 if __name__ == "__main__":
     num_epochs = 1  # Set to 1 for a single epoch
     for epoch in range(num_epochs):
