@@ -27,15 +27,6 @@ def train_one_epoch():
     np.random.seed(42)
     random.seed(42)
 
-    train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=128,
-        shuffle=True,
-        num_workers=0,
-        pin_memory=True
-    )
-
     device = torch.device("cpu")
     torch.set_num_threads(4)
     
@@ -88,10 +79,7 @@ def train_one_epoch():
     accuracy = 100. * correct / total
     print(f'Final Training Accuracy: {accuracy:.2f}%')
     
-    if accuracy < 95:
-        raise ValueError("Model accuracy is below 95%!")
-    
-    return accuracy
+    return model, accuracy
 
 def evaluate_model(model):
     device = torch.device("cpu")
@@ -99,7 +87,6 @@ def evaluate_model(model):
     correct = 0
     total = 0
 
-    # Using the globally defined transform
     test_dataset = datasets.MNIST('./data', train=False, download=True, transform=transform)
     test_loader = DataLoader(
         test_dataset,
@@ -109,7 +96,7 @@ def evaluate_model(model):
         pin_memory=True
     )
 
-    with torch.no_grad():  # Disable gradient calculation
+    with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)

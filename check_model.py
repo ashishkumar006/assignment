@@ -21,11 +21,8 @@ def check_model(param_threshold=25000, accuracy_threshold=95):
         ValueError: If the model exceeds the parameter threshold or does not meet the accuracy threshold.
     """
     # Initialize and train model
-    model = CompactMNIST()
-    logging.info("Model initialized. Training model...")
-    
-    # Train the model
-    train_accuracy = train_one_epoch()
+    logging.info("Initializing and training model...")
+    model, train_accuracy = train_one_epoch()  # Get both model and accuracy
     logging.info(f"Training completed. Training accuracy: {train_accuracy:.2f}%")
     
     # Count parameters
@@ -36,9 +33,9 @@ def check_model(param_threshold=25000, accuracy_threshold=95):
     if num_params >= param_threshold:
         raise ValueError(f"Number of parameters is {num_params}, which exceeds {param_threshold}.")
 
-    # Evaluate the model
+    # Evaluate the model using the trained model
     logging.info("Evaluating model...")
-    accuracy = evaluate_model(model)
+    accuracy = evaluate_model(model)  # Use the trained model
     logging.info(f"Evaluation accuracy: {accuracy:.2f}%")
     
     # Check accuracy
