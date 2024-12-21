@@ -1,5 +1,6 @@
 # Compact MNIST Classifier 🚀
 
+[![Build Status](https://github.com/yourusername/yourrepository/actions/workflows/model_test.yml/badge.svg)](https://github.com/yourusername/yourrepository/actions/workflows/model_test.yml)
 [![Model Tests](https://github.com/{username}/{repository}/actions/workflows/model_test.yml/badge.svg)](https://github.com/{username}/{repository}/actions/workflows/model_test.yml)
 [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.10.0-EE4C2C.svg)](https://pytorch.org/)
@@ -9,12 +10,12 @@ A lightweight PyTorch implementation of an MNIST classifier achieving **98.62%**
 
 ## 🎯 Model Performance
 
-| Metric | Value | Notes |
-|--------|-------|-------|
-| Parameters | 19,570 | 22% below limit |
-| Training Accuracy | 95.80% | Single epoch |
-| Test Accuracy | 98.62% | No augmentation |
-| Training Time | 1 epoch | CPU-only |
+| Metric | Value 
+|--------|-------
+| Parameters | 19,570 
+| Training Accuracy | 95.80% 
+| Test Accuracy | 98.62% 
+| Training Time | 1 epoch 
 
 ## 📦 Requirements
 
