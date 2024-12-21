@@ -30,6 +30,15 @@ def train_one_epoch():
     device = torch.device("cpu")
     torch.set_num_threads(4)
     
+    train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=128,
+        shuffle=True,
+        num_workers=0,
+        pin_memory=True
+    )
+    
     model = CompactMNIST().to(device)
     model.train()
 
