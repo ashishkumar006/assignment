@@ -101,4 +101,6 @@ def train_one_epoch():
     return accuracy
 
 if __name__ == "__main__":
-    train_one_epoch() 
+    num_epochs = 1  # Set to 1 for a single epoch
+    for epoch in range(num_epochs):
+        train_one_epoch() 
