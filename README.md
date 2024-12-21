@@ -1,7 +1,7 @@
 # Compact MNIST Classifier 🚀
 
-[![Build Status](https://github.com/yourusername/yourrepository/actions/workflows/model_test.yml/badge.svg)](https://github.com/yourusername/yourrepository/actions/workflows/model_test.yml)
-[![Model Tests](https://github.com/{username}/{repository}/actions/workflows/model_test.yml/badge.svg)](https://github.com/{username}/{repository}/actions/workflows/model_test.yml)
+[![Build Status](https://github.com/ashishkumar006/assignment/actions/workflows/model_test.yml/badge.svg)](https://github.com/ashishkumar006/assignment/actions/workflows/model_test.yml)
+[![Model Tests](https://github.com/ashishkumar006/assignment/actions/workflows/model_test.yml/badge.svg)](https://github.com/ashishkumar006/assignment/actions/workflows/model_test.yml)
 [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.10.0-EE4C2C.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -31,8 +31,8 @@ pytest
 
 ```bash
 # Clone repository
-git clone https://github.com/{username}/{repository}.git
-cd {repository}
+git clone https://github.com/ashishkumar006/assignment.git
+cd assignment
 
 # Install dependencies
 pip install -r requirements.txt
