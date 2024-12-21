@@ -9,6 +9,12 @@ import numpy as np
 import random
 import os
 
+# Define transform globally
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.1307,), (0.3081,))
+])
+
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
@@ -20,11 +26,6 @@ def train_one_epoch():
     torch.backends.cudnn.benchmark = False
     np.random.seed(42)
     random.seed(42)
-
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
 
     train_dataset = datasets.MNIST('./data', train=True, download=True, transform=transform)
     train_loader = DataLoader(
@@ -93,11 +94,12 @@ def train_one_epoch():
     return accuracy
 
 def evaluate_model(model):
+    device = torch.device("cpu")
     model.eval()  # Set the model to evaluation mode
     correct = 0
     total = 0
 
-    # Assuming you have a test dataset and DataLoader
+    # Using the globally defined transform
     test_dataset = datasets.MNIST('./data', train=False, download=True, transform=transform)
     test_loader = DataLoader(
         test_dataset,
@@ -121,4 +123,4 @@ def evaluate_model(model):
 if __name__ == "__main__":
     num_epochs = 1  # Set to 1 for a single epoch
     for epoch in range(num_epochs):
-        train_one_epoch() 
+        train_one_epoch()
