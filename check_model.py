@@ -1,9 +1,9 @@
 import torch
-from model import YourModelClass  # Replace with your actual model class
-from train import evaluate_model  # Replace with your actual evaluation function
+from model import CompactMNIST  # Use the actual model class name
+from train import evaluate_model  # Ensure this function is defined in train.py
 
 def check_model():
-    model = YourModelClass()  # Initialize your model
+    model = CompactMNIST()  # Initialize your model
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
     # Check number of parameters
